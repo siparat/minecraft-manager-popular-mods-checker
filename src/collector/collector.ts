@@ -30,7 +30,13 @@ export class HtmlCollector implements Collector {
 		const seen = new Map<string, ModCard>();
 
 		for (let page = 1; page <= maxPages; page++) {
-			const cards = await this.collectPage(page);
+			let cards: ModCard[];
+			try {
+				cards = await this.collectPage(page);
+			} catch (err) {
+				this.logger.warn({ page, err }, 'page fetch failed, skipping');
+				continue;
+			}
 			if (cards.length === 0) {
 				this.logger.debug({ page }, 'empty page, stopping pagination');
 				break;

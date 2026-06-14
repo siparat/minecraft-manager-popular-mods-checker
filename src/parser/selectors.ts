@@ -5,7 +5,7 @@ export const modSelectors = {
 } as const;
 
 export const statLabels = {
-	downloads: 'Downloads',
+	downloads: 'Total Downloads',
 	created: 'Created',
 	lastUpdate: 'Last Update',
 	updated: 'Updated'
