@@ -19,6 +19,12 @@ const envSchema = z.object({
 	JITTER_MIN_MS: z.coerce.number().int().nonnegative().default(200),
 	JITTER_MAX_MS: z.coerce.number().int().nonnegative().default(800),
 
+	NAV_TIMEOUT_MS: z.coerce.number().int().positive().default(30000),
+	RETRY_ATTEMPTS: z.coerce.number().int().positive().default(5),
+	RETRY_BASE_MS: z.coerce.number().int().positive().default(500),
+	RETRY_MAX_MS: z.coerce.number().int().positive().default(15000),
+	CACHE_TTL_MS: z.coerce.number().int().nonnegative().default(300000),
+
 	CRON_COLLECT: z.string().min(1).default('*/10 * * * *'),
 	CRON_ANALYZE: z.string().min(1).default('0 * * * *'),
 
@@ -51,7 +57,12 @@ export const config = {
 		parseConcurrency: env.PARSE_CONCURRENCY,
 		requestsPerSecond: env.REQUESTS_PER_SECOND,
 		jitterMinMs: env.JITTER_MIN_MS,
-		jitterMaxMs: env.JITTER_MAX_MS
+		jitterMaxMs: env.JITTER_MAX_MS,
+		navTimeoutMs: env.NAV_TIMEOUT_MS,
+		retryAttempts: env.RETRY_ATTEMPTS,
+		retryBaseMs: env.RETRY_BASE_MS,
+		retryMaxMs: env.RETRY_MAX_MS,
+		cacheTtlMs: env.CACHE_TTL_MS
 	},
 
 	cron: {

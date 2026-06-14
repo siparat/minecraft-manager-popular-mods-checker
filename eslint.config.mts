@@ -7,6 +7,9 @@ import prettierConfig from 'eslint-config-prettier';
 
 export default defineConfig([
 	{
+		ignores: ['dist', 'node_modules', 'drizzle']
+	},
+	{
 		files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
 		plugins: { js },
 		extends: ['js/recommended'],
