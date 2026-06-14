@@ -1,5 +1,5 @@
 import type { Logger } from 'pino';
-import type { BrowserPool } from './pool.js';
+import type { FetchBackend } from './backends/types.js';
 import type { HtmlCache } from './cache.js';
 import type { RateLimiter } from './rateLimiter.js';
 import { AntiBotError, withRetry } from './retry.js';
@@ -9,18 +9,23 @@ import type { FetchOptions, FetchResult, PageFetcher } from './types.js';
 export interface FetcherSettings {
 	jitterMinMs: number;
 	jitterMaxMs: number;
-	navTimeoutMs: number;
 	retryAttempts: number;
 	retryBaseMs: number;
 	retryMaxMs: number;
 	cacheTtlMs: number;
 }
 
-const CHALLENGE_MARKERS = ['Just a moment', 'Attention Required', 'cf-browser-verification', 'Checking your browser'];
+const CHALLENGE_MARKERS = [
+	'Just a moment',
+	'Один момент',
+	'Attention Required',
+	'cf-browser-verification',
+	'challenge-platform'
+];
 
-export class PlaywrightFetcher implements PageFetcher {
+export class CachingFetcher implements PageFetcher {
 	constructor(
-		private readonly pool: BrowserPool,
+		private readonly backend: FetchBackend,
 		private readonly rateLimiter: RateLimiter,
 		private readonly cache: HtmlCache,
 		private readonly settings: FetcherSettings,
@@ -34,7 +39,7 @@ export class PlaywrightFetcher implements PageFetcher {
 			return { html: cached.html, status: cached.status, fromCache: true };
 		}
 
-		const result = await withRetry(() => this.navigate(url, opts), {
+		const result = await withRetry(() => this.load(url, opts), {
 			attempts: this.settings.retryAttempts,
 			baseDelayMs: this.settings.retryBaseMs,
 			maxDelayMs: this.settings.retryMaxMs,
@@ -48,35 +53,21 @@ export class PlaywrightFetcher implements PageFetcher {
 		return result;
 	}
 
-	private async navigate(url: string, opts: FetchOptions): Promise<FetchResult> {
+	private async load(url: string, opts: FetchOptions): Promise<FetchResult> {
 		await this.rateLimiter.acquire();
 		await sleep(randomBetween(this.settings.jitterMinMs, this.settings.jitterMaxMs));
 
 		const startedAt = Date.now();
-		const context = await this.pool.createContext();
+		const waitOpts = opts.waitFor === undefined ? {} : { waitFor: opts.waitFor };
+		const { html, status } = await this.backend.fetch(url, waitOpts);
+		this.assertNotBlocked(status, html);
 
-		try {
-			const page = await context.newPage();
-			page.setDefaultNavigationTimeout(this.settings.navTimeoutMs);
+		this.logger.debug(
+			{ url, status, backend: this.backend.name, durationMs: Date.now() - startedAt },
+			'fetch completed'
+		);
 
-			const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
-			const status = response?.status() ?? 0;
-
-			if (opts.waitFor) {
-				await page.waitForSelector(opts.waitFor, {
-					timeout: this.settings.navTimeoutMs
-				});
-			}
-
-			const html = await page.content();
-			this.assertNotBlocked(status, html);
-
-			this.logger.debug({ url, status, durationMs: Date.now() - startedAt }, 'fetch completed');
-
-			return { html, status, fromCache: false };
-		} finally {
-			await context.close();
-		}
+		return { html, status, fromCache: false };
 	}
 
 	private assertNotBlocked(status: number, html: string): void {

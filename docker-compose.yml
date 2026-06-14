@@ -17,5 +17,16 @@ services:
             timeout: 5s
             retries: 10
 
+    flaresolverr:
+        image: ghcr.io/flaresolverr/flaresolverr:latest
+        container_name: popular-mods-flaresolverr
+        restart: unless-stopped
+        environment:
+            LOG_LEVEL: info
+            LANG: en_US
+            TZ: UTC
+        ports:
+            - '8191:8191'
+
 volumes:
     pgdata:

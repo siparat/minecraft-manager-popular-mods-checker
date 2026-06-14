@@ -19,6 +19,10 @@ const envSchema = z.object({
 	JITTER_MIN_MS: z.coerce.number().int().nonnegative().default(200),
 	JITTER_MAX_MS: z.coerce.number().int().nonnegative().default(800),
 
+	FETCH_BACKEND: z.enum(['playwright', 'flaresolverr']).default('flaresolverr'),
+	FLARESOLVERR_URL: z.string().default('http://localhost:8191/v1'),
+	FLARESOLVERR_MAX_TIMEOUT_MS: z.coerce.number().int().positive().default(60000),
+
 	NAV_TIMEOUT_MS: z.coerce.number().int().positive().default(30000),
 	RETRY_ATTEMPTS: z.coerce.number().int().positive().default(5),
 	RETRY_BASE_MS: z.coerce.number().int().positive().default(500),
@@ -51,6 +55,7 @@ export const config = {
 	databaseUrl: env.DATABASE_URL,
 
 	scraping: {
+		fetchBackend: env.FETCH_BACKEND,
 		searchPageSize: env.SEARCH_PAGE_SIZE,
 		maxPages: env.MAX_PAGES,
 		headless: env.HEADLESS,
@@ -63,6 +68,11 @@ export const config = {
 		retryBaseMs: env.RETRY_BASE_MS,
 		retryMaxMs: env.RETRY_MAX_MS,
 		cacheTtlMs: env.CACHE_TTL_MS
+	},
+
+	flaresolverr: {
+		url: env.FLARESOLVERR_URL,
+		maxTimeoutMs: env.FLARESOLVERR_MAX_TIMEOUT_MS
 	},
 
 	cron: {
