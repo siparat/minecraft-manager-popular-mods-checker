@@ -1,8 +1,7 @@
 import type { Logger } from 'pino';
 import { recordSent, wasRecentlySent } from '../db/repositories/notificationsRepo.js';
 import type { TrendResult } from '../analyzer/types.js';
-import type { ModDetails } from '../parser/types.js';
-import type { TrendEvent } from './events.js';
+import type { EventSource, TrendEvent } from './events.js';
 
 export class NotificationGate {
 	constructor(
@@ -10,7 +9,7 @@ export class NotificationGate {
 		private readonly logger: Logger
 	) {}
 
-	async build(details: ModDetails, trend: TrendResult, flags: string[]): Promise<TrendEvent | null> {
+	async build(details: EventSource, trend: TrendResult, flags: string[]): Promise<TrendEvent | null> {
 		const fresh: string[] = [];
 		for (const flag of flags) {
 			const sent = await wasRecentlySent(details.modId, flag, this.dedupHours);
