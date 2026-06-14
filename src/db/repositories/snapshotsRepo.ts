@@ -1,14 +1,29 @@
-import { and, desc, eq, lte } from 'drizzle-orm';
-import { db } from '../client.js';
+import { and, desc, eq, inArray, lte, max } from 'drizzle-orm';
+import { db, type Executor } from '../client.js';
 import { modSnapshots, type NewSnapshotRow, type SnapshotRow } from '../schema.js';
 
 export async function insertSnapshot(input: NewSnapshotRow): Promise<void> {
 	await db.insert(modSnapshots).values(input);
 }
 
-export async function insertSnapshots(inputs: NewSnapshotRow[]): Promise<void> {
+export async function insertSnapshots(inputs: NewSnapshotRow[], executor: Executor = db): Promise<void> {
 	if (inputs.length === 0) return;
-	await db.insert(modSnapshots).values(inputs);
+	await executor.insert(modSnapshots).values(inputs);
+}
+
+export async function getLatestTimes(modIds: string[]): Promise<Map<string, Date>> {
+	if (modIds.length === 0) return new Map();
+	const rows = await db
+		.select({ modId: modSnapshots.modId, latest: max(modSnapshots.snapshotAt) })
+		.from(modSnapshots)
+		.where(inArray(modSnapshots.modId, modIds))
+		.groupBy(modSnapshots.modId);
+
+	const result = new Map<string, Date>();
+	for (const row of rows) {
+		if (row.latest) result.set(row.modId, row.latest);
+	}
+	return result;
 }
 
 export async function getLatest(modId: string): Promise<SnapshotRow | undefined> {

@@ -9,6 +9,10 @@ export const db = drizzle(queryClient, { schema });
 
 export type Database = typeof db;
 
+export type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+export type Executor = Database | Transaction;
+
 export async function closeDb(): Promise<void> {
 	await queryClient.end({ timeout: 5 });
 }

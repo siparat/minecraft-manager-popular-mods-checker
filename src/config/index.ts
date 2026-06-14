@@ -28,6 +28,7 @@ const envSchema = z.object({
 	RETRY_BASE_MS: z.coerce.number().int().positive().default(500),
 	RETRY_MAX_MS: z.coerce.number().int().positive().default(15000),
 	CACHE_TTL_MS: z.coerce.number().int().nonnegative().default(300000),
+	SNAPSHOT_MIN_INTERVAL_MS: z.coerce.number().int().nonnegative().default(300000),
 
 	CRON_COLLECT: z.string().min(1).default('*/10 * * * *'),
 	CRON_ANALYZE: z.string().min(1).default('0 * * * *'),
@@ -73,6 +74,10 @@ export const config = {
 	flaresolverr: {
 		url: env.FLARESOLVERR_URL,
 		maxTimeoutMs: env.FLARESOLVERR_MAX_TIMEOUT_MS
+	},
+
+	snapshot: {
+		minIntervalMs: env.SNAPSHOT_MIN_INTERVAL_MS
 	},
 
 	cron: {
