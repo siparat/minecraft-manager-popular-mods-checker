@@ -18,7 +18,7 @@ services:
             retries: 10
 
     flaresolverr:
-        image: ghcr.io/flaresolverr/flaresolverr:latest
+        image: ghcr.io/flaresolverr/flaresolverr:v3.5.0
         container_name: popular-mods-flaresolverr
         restart: unless-stopped
         environment:
@@ -38,12 +38,9 @@ services:
             flaresolverr:
                 condition: service_started
         environment:
-            NODE_ENV: production
             DATABASE_URL: postgres://user:password@postgres:5432/main
-            FETCH_BACKEND: flaresolverr
             FLARESOLVERR_URL: http://flaresolverr:8191/v1
-            TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-            TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
-
+        volumes:
+          - ./.env:/app/.env
 volumes:
     pgdata:
