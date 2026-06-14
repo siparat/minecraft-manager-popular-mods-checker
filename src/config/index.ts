@@ -40,6 +40,7 @@ const envSchema = z.object({
 
 	TELEGRAM_BOT_TOKEN: z.string().default(''),
 	TELEGRAM_CHAT_ID: z.string().default(''),
+	TELEGRAM_TOPIC_ID: z.string().default(''),
 
 	NOTIFY_DEDUP_HOURS: z.coerce.number().int().positive().default(48)
 });
@@ -100,6 +101,7 @@ export const config = {
 	telegram: {
 		botToken: env.TELEGRAM_BOT_TOKEN,
 		chatId: env.TELEGRAM_CHAT_ID,
+		topicId: env.TELEGRAM_TOPIC_ID === '' ? undefined : Number(env.TELEGRAM_TOPIC_ID),
 		enabled: env.TELEGRAM_BOT_TOKEN !== '' && env.TELEGRAM_CHAT_ID !== ''
 	},
 

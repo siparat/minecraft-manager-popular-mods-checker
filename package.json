@@ -8,12 +8,17 @@
 		"dev": "tsx watch src/index.ts",
 		"build": "tsc",
 		"start": "node dist/index.js",
+		"collect-once": "node dist/index.js collect-once",
+		"analyze-once": "node dist/index.js analyze-once",
+		"dev:collect": "tsx src/index.ts collect-once",
+		"dev:analyze": "tsx src/index.ts analyze-once",
 		"lint": "eslint .",
 		"format": "prettier --write .",
 		"typecheck": "tsc --noEmit",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
-		"db:push": "drizzle-kit push"
+		"db:push": "drizzle-kit push",
+		"db:deploy": "node dist/db/migrate.js"
 	},
 	"keywords": [],
 	"author": "",

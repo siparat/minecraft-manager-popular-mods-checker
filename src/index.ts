@@ -1,19 +1,16 @@
-import { sql } from 'drizzle-orm';
-import { config } from './config/index.js';
-import { closeDb, db } from './db/client.js';
+import { start } from './app.js';
 import { logger } from './observability/logger.js';
 
-async function main(): Promise<void> {
-	logger.info({ nodeEnv: config.nodeEnv }, 'starting popular-mods-checker');
+process.on('unhandledRejection', (reason) => {
+	logger.error({ err: reason }, 'unhandled promise rejection');
+});
 
-	const result = await db.execute(sql`select 1 as ok`);
-	logger.info({ result: result[0] }, 'database connection verified');
+process.on('uncaughtException', (err) => {
+	logger.fatal({ err }, 'uncaught exception');
+	process.exit(1);
+});
 
-	await closeDb();
-	logger.info('shutdown complete');
-}
-
-main().catch((error) => {
-	logger.error({ err: error }, 'fatal error');
+start().catch((err) => {
+	logger.fatal({ err }, 'fatal error during startup');
 	process.exit(1);
 });

@@ -9,6 +9,7 @@ export interface CronSettings {
 
 export interface ScheduledJobs {
 	stop(): void;
+	drain(): Promise<void>;
 }
 
 export function startScheduler(pipeline: Pipeline, settings: CronSettings, logger: Logger): ScheduledJobs {
@@ -18,13 +19,17 @@ export function startScheduler(pipeline: Pipeline, settings: CronSettings, logge
 		}
 	}
 
+	const inflight = new Set<Promise<unknown>>();
+	const launch = (run: () => Promise<void>, label: string): void => {
+		const promise = run()
+			.catch((err) => logger.error({ err }, `${label} run failed`))
+			.finally(() => inflight.delete(promise));
+		inflight.add(promise);
+	};
+
 	const tasks: ScheduledTask[] = [
-		cron.schedule(settings.collect, () => {
-			pipeline.runCollect().catch((err) => logger.error({ err }, 'collect run failed'));
-		}),
-		cron.schedule(settings.analyze, () => {
-			pipeline.runAnalyze().catch((err) => logger.error({ err }, 'analyze run failed'));
-		})
+		cron.schedule(settings.collect, () => launch(() => pipeline.runCollect(), 'collect')),
+		cron.schedule(settings.analyze, () => launch(() => pipeline.runAnalyze(), 'analyze'))
 	];
 
 	logger.info({ collect: settings.collect, analyze: settings.analyze }, 'scheduler started');
@@ -33,6 +38,9 @@ export function startScheduler(pipeline: Pipeline, settings: CronSettings, logge
 		stop(): void {
 			for (const task of tasks) task.stop();
 			logger.info('scheduler stopped');
+		},
+		async drain(): Promise<void> {
+			await Promise.allSettled([...inflight]);
 		}
 	};
 }

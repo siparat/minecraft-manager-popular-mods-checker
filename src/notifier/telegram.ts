@@ -15,6 +15,7 @@ export class TelegramNotifier implements Notifier {
 	constructor(
 		private readonly botToken: string,
 		private readonly chatId: string,
+		private readonly topicId: number | undefined,
 		private readonly logger: Logger
 	) {}
 
@@ -22,6 +23,7 @@ export class TelegramNotifier implements Notifier {
 		const url = `https://api.telegram.org/bot${this.botToken}/sendMessage`;
 		const response = await httpPostJson(url, {
 			chat_id: this.chatId,
+			...(this.topicId !== undefined ? { message_thread_id: this.topicId } : {}),
 			text: formatTelegramMessage(event),
 			parse_mode: 'HTML',
 			disable_web_page_preview: false

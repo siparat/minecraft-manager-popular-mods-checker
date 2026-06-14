@@ -28,5 +28,22 @@ services:
         ports:
             - '8191:8191'
 
+    app:
+        build: .
+        container_name: popular-mods-app
+        restart: unless-stopped
+        depends_on:
+            postgres:
+                condition: service_healthy
+            flaresolverr:
+                condition: service_started
+        environment:
+            NODE_ENV: production
+            DATABASE_URL: postgres://user:password@postgres:5432/main
+            FETCH_BACKEND: flaresolverr
+            FLARESOLVERR_URL: http://flaresolverr:8191/v1
+            TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+            TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+
 volumes:
     pgdata:
