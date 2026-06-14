@@ -30,6 +30,11 @@ const envSchema = z.object({
 	CACHE_TTL_MS: z.coerce.number().int().nonnegative().default(300000),
 	SNAPSHOT_MIN_INTERVAL_MS: z.coerce.number().int().nonnegative().default(300000),
 
+	RULE_DAY: z.coerce.number().int().positive().default(1000),
+	RULE_WEEK: z.coerce.number().int().positive().default(10000),
+	RULE_TWO_WEEKS: z.coerce.number().int().positive().default(20000),
+	RULE_MONTH: z.coerce.number().int().positive().default(50000),
+
 	CRON_COLLECT: z.string().min(1).default('*/10 * * * *'),
 	CRON_ANALYZE: z.string().min(1).default('0 * * * *'),
 
@@ -78,6 +83,13 @@ export const config = {
 
 	snapshot: {
 		minIntervalMs: env.SNAPSHOT_MIN_INTERVAL_MS
+	},
+
+	rules: {
+		day: env.RULE_DAY,
+		week: env.RULE_WEEK,
+		twoWeeks: env.RULE_TWO_WEEKS,
+		month: env.RULE_MONTH
 	},
 
 	cron: {
