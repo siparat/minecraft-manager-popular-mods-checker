@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import { parseAbsoluteDate } from '../utils/date.js';
 import { parseCompactNumber } from '../utils/number.js';
 import { extractModSlug, searchSelectors, toAbsoluteUrl } from './selectors.js';
 import type { ModCard } from './types.js';
@@ -22,13 +23,16 @@ export function parseSearchHtml(html: string): ModCard[] {
 		const author = card.find(searchSelectors.author).first().text().trim();
 		const downloadsText = card.find(searchSelectors.downloads).first().text().trim();
 		const totalDownloads = downloadsText ? parseCompactNumber(downloadsText) : undefined;
+		const updatedText = card.find(searchSelectors.updated).first().text().trim();
+		const lastUpdated = parseAbsoluteDate(updatedText);
 
 		cards.push({
 			modId,
 			name,
 			url: toAbsoluteUrl(href),
 			...(author ? { author } : {}),
-			...(totalDownloads !== undefined ? { totalDownloads } : {})
+			...(totalDownloads !== undefined ? { totalDownloads } : {}),
+			...(lastUpdated ? { lastUpdated } : {})
 		});
 	});
 

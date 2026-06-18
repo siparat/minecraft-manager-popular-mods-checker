@@ -4,7 +4,8 @@ export const searchSelectors = {
 	card: 'div.project-card',
 	nameLink: 'a.name',
 	author: 'a.author-name',
-	downloads: 'li.detail-downloads'
+	downloads: 'li.detail-downloads',
+	updated: 'li.detail-updated span.date-full'
 } as const;
 
 export function buildSearchUrl(page: number, pageSize: number): string {

@@ -20,7 +20,8 @@ export const pipeline = new Pipeline(
 	{
 		maxPages: config.scraping.maxPages,
 		parseConcurrency: config.scraping.parseConcurrency,
-		rules: config.rules
+		rules: config.rules,
+		newModMaxAgeMs: config.newMod.maxAgeDays * 24 * 60 * 60 * 1000
 	},
 	logger.child({ module: 'pipeline' })
 );

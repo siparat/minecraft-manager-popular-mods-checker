@@ -1,8 +1,7 @@
-import { pageFetcher } from '../browser/index.js';
 import { logger } from '../observability/logger.js';
-import { HtmlParser } from './parser.js';
+import { CardParser } from './cardParser.js';
 
-export const parser = new HtmlParser(pageFetcher, logger.child({ module: 'parser' }));
+export const parser = new CardParser(logger.child({ module: 'parser' }));
 
-export { parseModDetails, ModParseError } from './parse.js';
+export { ModParseError } from './parse.js';
 export type { Parser, ModDetails } from './types.js';

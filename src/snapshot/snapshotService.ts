@@ -21,7 +21,9 @@ export class SnapshotService {
 		await this.saveMany([details]);
 	}
 
-	async saveMany(detailsList: ModDetails[]): Promise<SaveResult> {
+	// `seedCreatedAt` backdates the first-seen timestamp of newly inserted mods. Used on the
+	// very first (baseline) run so the existing top mods are not treated as fresh releases.
+	async saveMany(detailsList: ModDetails[], seedCreatedAt?: Date): Promise<SaveResult> {
 		if (detailsList.length === 0) {
 			return { mods: 0, snapshots: 0, skipped: 0 };
 		}
@@ -40,7 +42,8 @@ export class SnapshotService {
 			name: details.name,
 			url: details.url,
 			author: details.author,
-			categories: details.categories
+			categories: details.categories,
+			...(seedCreatedAt ? { createdAt: seedCreatedAt } : {})
 		}));
 
 		const snapshotRows: NewSnapshotRow[] = candidates.map((details) => ({

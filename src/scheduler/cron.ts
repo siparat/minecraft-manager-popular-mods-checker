@@ -5,6 +5,7 @@ import type { Pipeline } from './pipeline.js';
 export interface CronSettings {
 	collect: string;
 	analyze: string;
+	runOnStart: boolean;
 }
 
 export interface ScheduledJobs {
@@ -33,6 +34,12 @@ export function startScheduler(pipeline: Pipeline, settings: CronSettings, logge
 	];
 
 	logger.info({ collect: settings.collect, analyze: settings.analyze }, 'scheduler started');
+
+	if (settings.runOnStart) {
+		logger.info('running pipeline on startup');
+		// runCollect analyzes fresh data itself, so a single call covers the full pipeline.
+		launch(() => pipeline.runCollect(), 'startup');
+	}
 
 	return {
 		stop(): void {

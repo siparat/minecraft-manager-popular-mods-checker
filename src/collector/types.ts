@@ -4,6 +4,7 @@ export interface ModCard {
 	url: string;
 	author?: string;
 	totalDownloads?: number;
+	lastUpdated?: Date;
 }
 
 export interface Collector {

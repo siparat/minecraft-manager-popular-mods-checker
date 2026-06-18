@@ -34,9 +34,14 @@ const envSchema = z.object({
 	RULE_WEEK: z.coerce.number().int().positive().default(10000),
 	RULE_TWO_WEEKS: z.coerce.number().int().positive().default(20000),
 	RULE_MONTH: z.coerce.number().int().positive().default(50000),
+	NEW_MOD_MAX_AGE_DAYS: z.coerce.number().int().positive().default(30),
 
 	CRON_COLLECT: z.string().min(1).default('*/10 * * * *'),
 	CRON_ANALYZE: z.string().min(1).default('0 * * * *'),
+	RUN_ON_START: z
+		.enum(['true', 'false'])
+		.default('false')
+		.transform((value) => value === 'true'),
 
 	TELEGRAM_BOT_TOKEN: z.string().default(''),
 	TELEGRAM_CHAT_ID: z.string().default(''),
@@ -93,9 +98,14 @@ export const config = {
 		month: env.RULE_MONTH
 	},
 
+	newMod: {
+		maxAgeDays: env.NEW_MOD_MAX_AGE_DAYS
+	},
+
 	cron: {
 		collect: env.CRON_COLLECT,
-		analyze: env.CRON_ANALYZE
+		analyze: env.CRON_ANALYZE,
+		runOnStart: env.RUN_ON_START
 	},
 
 	telegram: {
