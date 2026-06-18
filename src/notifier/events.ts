@@ -10,6 +10,7 @@ export interface TrendEvent {
 	name: string;
 	url: string;
 	author: string;
+	totalDownloads?: number;
 	delta1d?: number;
 	delta7d?: number;
 	delta14d?: number;

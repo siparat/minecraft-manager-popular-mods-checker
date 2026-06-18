@@ -3,7 +3,7 @@ import type { Logger } from 'pino';
 import { evaluate, type RuleThresholds } from '../analyzer/rules.js';
 import type { ITrendAnalyzer } from '../analyzer/types.js';
 import type { Collector } from '../collector/types.js';
-import { countMods, getMod, listNewModIds } from '../db/repositories/modsRepo.js';
+import { backdateAllMods, countMods, getMod, listNewModIds } from '../db/repositories/modsRepo.js';
 import type { Parser } from '../parser/types.js';
 import type { ModDetails } from '../parser/types.js';
 import type { NotificationGate } from '../notifier/gate.js';
@@ -44,7 +44,16 @@ export class Pipeline {
 		private readonly logger: Logger
 	) {}
 
-	async runCollect(): Promise<void> {
+	// Seed run: collect everything once, mark all mods as old (not-new), then the caller exits.
+	// After this, only mods that appear for the first time later are treated as fresh releases.
+	async seedBaseline(): Promise<void> {
+		this.logger.info('seed-baseline: collecting current mods');
+		await this.runCollect(false);
+		const marked = await backdateAllMods(new Date('1900-01-01T00:00:00Z'));
+		this.logger.info({ marked }, 'seed-baseline finished: all mods marked as not-new');
+	}
+
+	async runCollect(analyzeAfter = true): Promise<void> {
 		if (this.collectRunning) {
 			this.logger.warn('collect already running, skipping tick');
 			return;
@@ -109,7 +118,7 @@ export class Pipeline {
 		}
 
 		// Analyze immediately on fresh data so spikes are sent right away, not batched later.
-		await this.runAnalyze();
+		if (analyzeAfter) await this.runAnalyze();
 	}
 
 	async runAnalyze(): Promise<void> {

@@ -13,6 +13,7 @@ export class TrendAnalyzer implements ITrendAnalyzer {
 
 		const result: TrendResult = {
 			modId,
+			current: row.current,
 			delta1d: delta(row.p1),
 			delta7d: delta(row.p7),
 			delta14d: delta(row.p14),

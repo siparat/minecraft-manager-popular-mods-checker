@@ -52,6 +52,13 @@ export async function listNewModIds(maxAgeMs: number): Promise<string[]> {
 	return rows.map((row) => row.id);
 }
 
+// Stamp every known mod with a given first-seen date. Used by the seed-baseline run to
+// mark all currently-tracked mods as old so they are never treated as fresh releases.
+export async function backdateAllMods(date: Date): Promise<number> {
+	const updated = await db.update(mods).set({ createdAt: date }).returning({ id: mods.id });
+	return updated.length;
+}
+
 export async function countMods(): Promise<number> {
 	const rows = await db.select({ value: sql<number>`count(*)::int` }).from(mods);
 	return rows[0]?.value ?? 0;

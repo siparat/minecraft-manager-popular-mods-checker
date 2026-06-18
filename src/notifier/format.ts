@@ -20,6 +20,9 @@ export function formatTelegramMessage(event: TrendEvent): string {
 	const lines = [
 		`🔥 <a href="${url}"><b>${escapeHtml(event.name)}</b></a>`,
 		`Автор: ${escapeHtml(event.author)}`,
+		...(event.totalDownloads !== undefined
+			? [`Всего скачиваний: ${event.totalDownloads.toLocaleString('ru-RU')}`]
+			: []),
 		''
 	];
 

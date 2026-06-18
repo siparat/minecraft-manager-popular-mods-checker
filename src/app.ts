@@ -5,7 +5,7 @@ import { logger } from './observability/logger.js';
 import type { ScheduledJobs } from './scheduler/cron.js';
 import { pipeline, startCron } from './scheduler/index.js';
 
-export type RunMode = 'serve' | 'collect-once' | 'analyze-once';
+export type RunMode = 'serve' | 'collect-once' | 'analyze-once' | 'seed-baseline';
 
 const SHUTDOWN_TIMEOUT_MS = 20000;
 
@@ -13,7 +13,7 @@ let shuttingDown = false;
 
 export function resolveMode(argv: readonly string[]): RunMode {
 	const value = argv[2] ?? process.env.RUN_MODE ?? 'serve';
-	if (value === 'serve' || value === 'collect-once' || value === 'analyze-once') {
+	if (value === 'serve' || value === 'collect-once' || value === 'analyze-once' || value === 'seed-baseline') {
 		return value;
 	}
 	throw new Error(`unknown run mode: ${value}`);
@@ -36,6 +36,12 @@ export async function start(): Promise<void> {
 
 	if (mode === 'analyze-once') {
 		await pipeline.runAnalyze();
+		await closeResources();
+		return;
+	}
+
+	if (mode === 'seed-baseline') {
+		await pipeline.seedBaseline();
 		await closeResources();
 		return;
 	}

@@ -26,6 +26,7 @@ export class NotificationGate {
 			name: details.name,
 			url: details.url,
 			author: details.author,
+			totalDownloads: trend.current,
 			delta1d: trend.delta1d,
 			delta7d: trend.delta7d,
 			delta14d: trend.delta14d,

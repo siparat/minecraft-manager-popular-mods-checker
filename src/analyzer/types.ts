@@ -1,5 +1,6 @@
 export interface TrendResult {
 	modId: string;
+	current: number;
 	delta1d: number;
 	delta7d: number;
 	delta14d: number;

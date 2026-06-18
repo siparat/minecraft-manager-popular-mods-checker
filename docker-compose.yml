@@ -41,6 +41,6 @@ services:
             DATABASE_URL: postgres://user:password@postgres:5432/main
             FLARESOLVERR_URL: http://flaresolverr:8191/v1
         volumes:
-          - ./.env:/app/.env
+            - ./.env:/app/.env
 volumes:
     pgdata:
