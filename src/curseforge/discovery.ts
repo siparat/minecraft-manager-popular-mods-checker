@@ -12,13 +12,6 @@ export interface DiscoverySettings {
 	windowSize: number;
 }
 
-function releaseTimestamp(mod: ApiMod): number | null {
-	const value = mod.dateReleased ?? mod.dateCreated;
-	if (!value) return null;
-	const parsed = Date.parse(value);
-	return Number.isNaN(parsed) ? null : parsed;
-}
-
 function createdTimestamp(mod: ApiMod): number | null {
 	if (!mod.dateCreated) return null;
 	const parsed = Date.parse(mod.dateCreated);
@@ -26,8 +19,8 @@ function createdTimestamp(mod: ApiMod): number | null {
 }
 
 export function toModDetails(mod: ApiMod): ModDetails | null {
-	const release = releaseTimestamp(mod);
-	if (release === null || typeof mod.downloadCount !== 'number') return null;
+	const created = createdTimestamp(mod);
+	if (created === null || typeof mod.downloadCount !== 'number') return null;
 
 	const author = mod.authors?.[0]?.name ?? '';
 	const categories = (mod.categories ?? [])
@@ -42,7 +35,7 @@ export function toModDetails(mod: ApiMod): ModDetails | null {
 		author,
 		categories,
 		totalDownloads: mod.downloadCount,
-		releaseDate: new Date(release),
+		releaseDate: new Date(created),
 		...(mod.dateModified ? { updateDate: new Date(mod.dateModified) } : {})
 	};
 }
@@ -83,8 +76,8 @@ export async function discoverFreshMods(
 
 		for (const mod of mods) {
 			if (mod.gameId !== MINECRAFT_GAME_ID || mod.classId !== MOD_CLASS_ID) continue;
-			const release = releaseTimestamp(mod);
-			if (release === null || release < cutoff) continue;
+			const created = createdTimestamp(mod);
+			if (created === null || created < cutoff) continue;
 			if (mod.downloadCount < settings.minDownloads) continue;
 			const detail = toModDetails(mod);
 			if (detail) details.push(detail);
