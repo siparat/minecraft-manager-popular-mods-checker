@@ -1,13 +1,19 @@
-import { bigint, bigserial, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { bigint, bigserial, index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
-export const mods = pgTable('mods', {
-	id: text('id').primaryKey(),
-	name: text('name').notNull(),
-	url: text('url').notNull(),
-	author: text('author'),
-	categories: text('categories').array(),
-	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
-});
+export const mods = pgTable(
+	'mods',
+	{
+		id: text('id').primaryKey(),
+		projectId: integer('project_id'),
+		name: text('name').notNull(),
+		url: text('url').notNull(),
+		author: text('author'),
+		categories: text('categories').array(),
+		releaseDate: timestamp('release_date', { withTimezone: true }),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
+	},
+	(table) => [index('idx_mods_release_date').on(table.releaseDate.desc())]
+);
 
 export const modSnapshots = pgTable(
 	'mod_snapshots',

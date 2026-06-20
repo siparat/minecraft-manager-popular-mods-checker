@@ -5,7 +5,7 @@ import { logger } from './observability/logger.js';
 import type { ScheduledJobs } from './scheduler/cron.js';
 import { pipeline, startCron } from './scheduler/index.js';
 
-export type RunMode = 'serve' | 'collect-once' | 'analyze-once' | 'seed-baseline';
+export type RunMode = 'serve' | 'fresh-once';
 
 const SHUTDOWN_TIMEOUT_MS = 20000;
 
@@ -13,7 +13,7 @@ let shuttingDown = false;
 
 export function resolveMode(argv: readonly string[]): RunMode {
 	const value = argv[2] ?? process.env.RUN_MODE ?? 'serve';
-	if (value === 'serve' || value === 'collect-once' || value === 'analyze-once' || value === 'seed-baseline') {
+	if (value === 'serve' || value === 'fresh-once') {
 		return value;
 	}
 	throw new Error(`unknown run mode: ${value}`);
@@ -28,20 +28,8 @@ export async function start(): Promise<void> {
 	const mode = resolveMode(process.argv);
 	logger.info({ mode, nodeEnv: config.nodeEnv }, 'starting popular-mods-checker');
 
-	if (mode === 'collect-once') {
-		await pipeline.runCollect();
-		await closeResources();
-		return;
-	}
-
-	if (mode === 'analyze-once') {
-		await pipeline.runAnalyze();
-		await closeResources();
-		return;
-	}
-
-	if (mode === 'seed-baseline') {
-		await pipeline.seedBaseline();
+	if (mode === 'fresh-once') {
+		await pipeline.runFreshCycle();
 		await closeResources();
 		return;
 	}

@@ -8,16 +8,21 @@ const envSchema = z.object({
 	DATABASE_URL: z.string().min(1),
 
 	SEARCH_PAGE_SIZE: z.coerce.number().int().positive().default(50),
-	MAX_PAGES: z.coerce.number().int().positive().default(20),
+	MAX_PAGES: z.coerce.number().int().positive().default(2000),
 	HEADLESS: z
 		.enum(['true', 'false'])
 		.default('true')
 		.transform((value) => value === 'true'),
 	PARSE_CONCURRENCY: z.coerce.number().int().positive().default(2),
+	FRESH_CONCURRENCY: z.coerce.number().int().positive().default(2),
 
 	REQUESTS_PER_SECOND: z.coerce.number().positive().default(1),
 	JITTER_MIN_MS: z.coerce.number().int().nonnegative().default(200),
 	JITTER_MAX_MS: z.coerce.number().int().nonnegative().default(800),
+
+	CURSEFORGE_API_KEY: z.string().default(''),
+	CURSEFORGE_API_URL: z.string().default('https://api.curseforge.com'),
+	CF_BATCH_SIZE: z.coerce.number().int().positive().default(1000),
 
 	FETCH_BACKEND: z.enum(['playwright', 'flaresolverr']).default('flaresolverr'),
 	FLARESOLVERR_URL: z.string().default('http://localhost:8191/v1'),
@@ -35,9 +40,9 @@ const envSchema = z.object({
 	RULE_TWO_WEEKS: z.coerce.number().int().positive().default(20000),
 	RULE_MONTH: z.coerce.number().int().positive().default(50000),
 	NEW_MOD_MAX_AGE_DAYS: z.coerce.number().int().positive().default(30),
+	FRESH_MIN_DOWNLOADS: z.coerce.number().int().nonnegative().default(0),
 
-	CRON_COLLECT: z.string().min(1).default('*/10 * * * *'),
-	CRON_ANALYZE: z.string().min(1).default('0 * * * *'),
+	CRON_FRESH: z.string().min(1).default('*/30 * * * *'),
 	RUN_ON_START: z
 		.enum(['true', 'false'])
 		.default('false')
@@ -72,6 +77,7 @@ export const config = {
 		maxPages: env.MAX_PAGES,
 		headless: env.HEADLESS,
 		parseConcurrency: env.PARSE_CONCURRENCY,
+		freshConcurrency: env.FRESH_CONCURRENCY,
 		requestsPerSecond: env.REQUESTS_PER_SECOND,
 		jitterMinMs: env.JITTER_MIN_MS,
 		jitterMaxMs: env.JITTER_MAX_MS,
@@ -80,6 +86,12 @@ export const config = {
 		retryBaseMs: env.RETRY_BASE_MS,
 		retryMaxMs: env.RETRY_MAX_MS,
 		cacheTtlMs: env.CACHE_TTL_MS
+	},
+
+	curseforge: {
+		baseUrl: env.CURSEFORGE_API_URL,
+		apiKey: env.CURSEFORGE_API_KEY,
+		batchSize: env.CF_BATCH_SIZE
 	},
 
 	flaresolverr: {
@@ -99,12 +111,12 @@ export const config = {
 	},
 
 	newMod: {
-		maxAgeDays: env.NEW_MOD_MAX_AGE_DAYS
+		maxAgeDays: env.NEW_MOD_MAX_AGE_DAYS,
+		minDownloads: env.FRESH_MIN_DOWNLOADS
 	},
 
 	cron: {
-		collect: env.CRON_COLLECT,
-		analyze: env.CRON_ANALYZE,
+		fresh: env.CRON_FRESH,
 		runOnStart: env.RUN_ON_START
 	},
 

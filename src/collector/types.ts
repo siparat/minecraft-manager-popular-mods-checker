@@ -3,8 +3,11 @@ export interface ModCard {
 	name: string;
 	url: string;
 	author?: string;
+	projectId?: number;
 	totalDownloads?: number;
-	lastUpdated?: Date;
+	releaseDate?: Date;
+	updateDate?: Date;
+	categories?: string[];
 }
 
 export interface Collector {

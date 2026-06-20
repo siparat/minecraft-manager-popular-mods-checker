@@ -4,4 +4,5 @@ import { CardParser } from './cardParser.js';
 export const parser = new CardParser(logger.child({ module: 'parser' }));
 
 export { ModParseError } from './parse.js';
+export { parseDetailHtml } from './detailParser.js';
 export type { Parser, ModDetails } from './types.js';

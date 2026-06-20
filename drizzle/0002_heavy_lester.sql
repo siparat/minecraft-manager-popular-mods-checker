@@ -1,0 +1,1 @@
+ALTER TABLE "mods" ADD COLUMN "project_id" integer;

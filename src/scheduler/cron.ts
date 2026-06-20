@@ -3,8 +3,7 @@ import type { Logger } from 'pino';
 import type { Pipeline } from './pipeline.js';
 
 export interface CronSettings {
-	collect: string;
-	analyze: string;
+	fresh: string;
 	runOnStart: boolean;
 }
 
@@ -14,10 +13,8 @@ export interface ScheduledJobs {
 }
 
 export function startScheduler(pipeline: Pipeline, settings: CronSettings, logger: Logger): ScheduledJobs {
-	for (const expression of [settings.collect, settings.analyze]) {
-		if (!cron.validate(expression)) {
-			throw new Error(`invalid cron expression: ${expression}`);
-		}
+	if (!cron.validate(settings.fresh)) {
+		throw new Error(`invalid cron expression: ${settings.fresh}`);
 	}
 
 	const inflight = new Set<Promise<unknown>>();
@@ -29,16 +26,14 @@ export function startScheduler(pipeline: Pipeline, settings: CronSettings, logge
 	};
 
 	const tasks: ScheduledTask[] = [
-		cron.schedule(settings.collect, () => launch(() => pipeline.runCollect(), 'collect')),
-		cron.schedule(settings.analyze, () => launch(() => pipeline.runAnalyze(), 'analyze'))
+		cron.schedule(settings.fresh, () => launch(() => pipeline.runFreshCycle(), 'fresh'))
 	];
 
-	logger.info({ collect: settings.collect, analyze: settings.analyze }, 'scheduler started');
+	logger.info({ fresh: settings.fresh }, 'scheduler started');
 
 	if (settings.runOnStart) {
 		logger.info('running pipeline on startup');
-		// runCollect analyzes fresh data itself, so a single call covers the full pipeline.
-		launch(() => pipeline.runCollect(), 'startup');
+		launch(() => pipeline.runFreshCycle(), 'startup');
 	}
 
 	return {

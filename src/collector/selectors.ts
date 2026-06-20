@@ -1,11 +1,7 @@
 export const BASE_URL = 'https://www.curseforge.com';
 
 export const searchSelectors = {
-	card: 'div.project-card',
-	nameLink: 'a.name',
-	author: 'a.author-name',
-	downloads: 'li.detail-downloads',
-	updated: 'li.detail-updated span.date-full'
+	card: 'div.project-card'
 } as const;
 
 export function buildSearchUrl(page: number, pageSize: number): string {
@@ -14,9 +10,4 @@ export function buildSearchUrl(page: number, pageSize: number): string {
 
 export function toAbsoluteUrl(href: string): string {
 	return href.startsWith('http') ? href : `${BASE_URL}${href}`;
-}
-
-export function extractModSlug(href: string): string | undefined {
-	const match = /\/minecraft\/mc-mods\/([^/?#]+)/.exec(href);
-	return match?.[1];
 }

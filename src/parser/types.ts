@@ -2,14 +2,14 @@ import type { ModCard } from '../collector/types.js';
 
 export interface ModDetails {
 	modId: string;
+	projectId?: number;
 	name: string;
 	url: string;
 	author: string;
 	categories: string[];
 	totalDownloads: number;
-	followers?: number;
-	lastUpdated: Date;
-	createdAt?: Date;
+	releaseDate: Date;
+	updateDate?: Date;
 }
 
 export interface Parser {
